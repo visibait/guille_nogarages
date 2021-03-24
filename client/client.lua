@@ -1,9 +1,4 @@
-----------------------------------------------------------------------------
-----------------------------------Made By:----------------------------------
--------------------------------guillerp#1928--------------------------------
--------------Don't touch if you don't know what are you doing---------------
-----------------------------------------------------------------------------
-----------------------------------------------------------------------------
+-- Guille_NoGarages Optimized by VisiBait -> https://github.com/visibait. Original author: guillerp8 -> https://github.com/guillerp8
 
 ESX = nil
 local playerloaded
@@ -20,27 +15,24 @@ AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
         CreateBlip()
         GetPlayers()
-        print("create vehicles")
     end
 end)
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
     playerLoaded = true
-    print("spawn")
     GetPlayers()
     CreateBlip()
 end)
 
-function GetPlayers()
+GetPlayers = function()
     Citizen.Wait(Config.timetospawn * 1000)
-    print(GetNumberOfPlayers())
     ESX.ShowNotification('Do not restart FiveM, we are loading your cars.')
     Citizen.Wait(1000)
     CreateVehicles()
 end
 
-function CreateBlip()
+CreateBlip = function()
     local Blip = AddBlipForCoord(vector3(494.52, -1334.12, 29.32))
     SetBlipSprite (Blip, 635)
     SetBlipDisplay(Blip, 4)
@@ -52,11 +44,10 @@ function CreateBlip()
     EndTextCommandSetBlipName(Blip)
 end
 
-function CreateVehicles()
+CreateVehicles = function()
     local player = GetPlayerPed(-1)
     ESX.TriggerServerCallback('guille_getvehicles', function(vehicles)
         local coords = GetEntityCoords(player)
-        --DoScreenFadeOut(1000)
         Citizen.Wait(1000)
         for i = 1, #vehicles, 1 do
             Citizen.Wait(30)
@@ -85,7 +76,7 @@ end
 
 
 
-function LoadModel(model)
+LoadModel = function(model)
 	while not HasModelLoaded(model) do
 		RequestModel(model)
 		Citizen.Wait(5)
@@ -95,33 +86,32 @@ end
 Citizen.CreateThread(function()   
     while true do
         Citizen.Wait(Config.savetime * 1000)
-        local player = GetPlayerPed(-1) 
+        local player = PlayerPedId() 
         if IsPedInAnyVehicle(player) then
             local car = GetVehiclePedIsUsing(player)
             local properties = ESX.Game.GetVehicleProperties(car)
             local headings = GetEntityHeading(car)
             local plate = properties["plate"]
-            print("^2 Saved vehicle ^0" .. plate .. "")
             TriggerServerEvent("guille_storevehicle", plate, properties, headings)
             SetEntityAsMissionEntity(car, true, true)
-        end
-        
+        end        
     end
-
 end)
 
 Citizen.CreateThread(function()
-
     while true do
         Citizen.Wait(0)
+        local sleep = true
         dist = GetDistanceBetweenCoords(vector3(494.64, -1333.92, 29.32), GetEntityCoords(PlayerPedId(), true), true)
         if dist < 5 then
+            sleep = false
             DrawMarker(0, 494.64, -1333.92, 29.32, 0,0,0,0,0,0,0.5,0.5,0.5,255,255,0,165,true,true,0,0)
             ShowFloatingHelpNotification('Press ~g~E~w~ to open the depot', vector3(494.64, -1333.92, 29.32 + 1))
             if IsControlJustPressed(0, 38) then
                 ReturnVehicleMenu()
             end
         end
+        if sleep then Citizen.Wait(500) end
     end
 end)
 
@@ -129,12 +119,11 @@ RegisterCommand("getvehicles", function()
     ESX.TriggerServerCallback('getvehiclescommand', function(pos)
         for i = 1, #pos, 1 do
             local position = pos[i]["position"]
-            print("^2 Vehicle in property: ^4" .. position.x, position.y, position.z .. "")
         end
     end)
 end)
 
-function ShowFloatingHelpNotification(msg, coords)
+ShowFloatingHelpNotification = function(msg, coords)
     AddTextEntry('FloatingHelpNotification', msg)
     SetFloatingHelpTextWorldPosition(1, coords)
     SetFloatingHelpTextStyle(1, 1, 2, -1, 3, 0)
@@ -142,7 +131,7 @@ function ShowFloatingHelpNotification(msg, coords)
     EndTextCommandDisplayHelp(2, false, false, -1)
 end
 
-function OpenMenuGarage(PointType)
+OpenMenuGarage = function(PointType)
     ESX.UI.Menu.CloseAll()
     local elements = {}
 
@@ -165,7 +154,7 @@ function OpenMenuGarage(PointType)
 
 end
 
-function ReturnVehicleMenu()
+ReturnVehicleMenu = function()
     ESX.TriggerServerCallback('guille_nogarages:getOutVehicles', function(vehicles)
         local elements = {}
 
@@ -200,7 +189,7 @@ function ReturnVehicleMenu()
     end)
 end
 
-function SpawnPoundedVehicle(vehicle)
+SpawnPoundedVehicle = function(vehicle)
     LoadModel(vehicle.model)
     local car = CreateVehicle(vehicle.model, 489.64, -1333.88, 29.32 - 0.975, 316.84, true, true)
     ESX.Game.SetVehicleProperties(car, vehicle)
@@ -211,7 +200,7 @@ function SpawnPoundedVehicle(vehicle)
     ESX.Game.SetVehicleProperties(car_2, vehicle)
 end
 
-function delvehifexist(veh_plate)
+delvehifexist = function(veh_plate)
 	local cars = ESX.Game.GetVehicles()
 	for i=1, #cars, 1 do
         	local found_plate = GetVehicleNumberPlateText(cars[i])
